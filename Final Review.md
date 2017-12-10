@@ -259,3 +259,59 @@ MIL syntax is only available in constructors.
 `string s = "Hello";`
 
 Left-hand side is C++ style `std::string`, while right-hand side is a C style `char *` string. An implicit conversion is being made here, from `char *` to `std::string`. To disable automatic conversions, prefix the constructor with the `explicit` keyword.
+
+### Copy constructors and copy assignment operators
+
+#### Copy constructor
+
+We can initialize objects as copies of others easily in C++:
+
+`Fruit myApple{"Apple, 10, "Red};`
+`Fruit myCopy{myApple}; //exact same fields/data  as myApple`
+`Fruit myOtherCopy = myApple; //also copies`
+
+This is done by the __copy constructor__, which creates a copy from an existing object. We get this for free!
+
+Consider this linked list node class and copying it with the default constructor:
+
+`struct Node{`
+	`int data;`
+    `Node *next;`
+    `Node(const Node &other): data{other.data}, next{other.next}{}`
+`};`
+
+`Node *np = new Node{1, new Node{2, new Node{3, nullptr}}};`
+`Node m{&np};`
+
+The first "next" node of m is just pointing to the second node in the original, so if original is destroyed, m has a dangling pointer. This is a __shallow copy__.
+
+We need to do a __deep copy__ in order for m to have it's own node. Usuallyneed this when we have a __heap allocated__ object in the class:
+
+`Node(const Node &other): data{other.data}, next{other.next ? new Node{*other.next} : nullptr}`
+
+A copy constructor is used:
+
+1. When an object is constructed as copy of another object
+2. Pass by value
+3. Pass by reference
+
+Note: the parameter of a copy constructor is __always__ passed by reference.
+
+#### Copy assignment operator
+
+The copy assignment operator assigns an __existing__ object to be a copy of another:
+
+`Fruit myApple{"Apple", 10, "Red"};`
+`Fruit myOrange{"Orange", 7, "Orange"}; //copy constructor used here`
+`Fruit myFruit{"", 0, ""};`
+`myFruit = myOrange; //copy assignment operator used here`
+
+The copy assignment operator must always be implemented as a method:
+
+`struct Node {`
+`...`
+`Node &operator=(const Node &other) {`
+`data = other.data;`
+`delete this->next;`
+`}`
+`};`
